@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kindergarten Ready — Day by Day</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky:#EAF4FB; --sky-line:#CFE4F2;
+    --leaf:#4F7A45; --leaf-light:#EAF3E4; --leaf-dark:#33512C;
+    --sun:#F5B942; --sun-dark:#8A5A00;
+    --coral:#E8663D; --coral-light:#FCEBE4; --coral-dark:#7A2C14;
+    --ink:#2B2A25; --ink-soft:#6B6659;
+    --paper:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--sky); color:var(--ink);
+    font-family:'Nunito',sans-serif;
+    min-height:100vh;
+  }
+  .wrap{ max-width:980px; margin:0 auto; padding:28px 20px 60px; }
+  header{ text-align:center; margin-bottom:20px; }
+  h1{ font-family:'Baloo 2',sans-serif; font-weight:700; font-size:clamp(28px,5vw,40px); margin:0 0 4px; color:var(--leaf-dark); }
+  .tagline{ color:var(--ink-soft); font-size:15px; margin:0 0 14px; }
+  .track-switch{ display:inline-flex; gap:6px; background:var(--paper); border:1.5px solid var(--sky-line); border-radius:999px; padding:5px; }
+  .track-btn{
+    font-family:'Baloo 2',sans-serif; font-weight:600; font-size:13px; border:none; background:none;
+    color:var(--ink-soft); padding:8px 18px; border-radius:999px; cursor:pointer;
+  }
+  .track-btn.active{ background:var(--leaf); color:#fff; }
+  .swap-toggle-btn{
+    font-family:'Baloo 2',sans-serif; font-weight:600; font-size:12.5px; border:1.5px solid var(--coral);
+    background:var(--coral-light); color:var(--coral-dark); padding:7px 16px; border-radius:999px; cursor:pointer;
+  }
+  .swap-toggle-btn.active{ background:var(--coral); color:#fff; }
+  .attendance-toggle-btn{
+    font-family:'Baloo 2',sans-serif; font-weight:600; font-size:12.5px; border:1.5px solid var(--leaf);
+    background:var(--leaf-light); color:var(--leaf-dark); padding:7px 16px; border-radius:999px; cursor:pointer;
+    margin-left:8px;
+  }
+  .attendance-toggle-btn.active{ background:var(--leaf); color:#fff; }
+  .student-btn{
+    display:block; margin:0 auto 12px; font-family:'Baloo 2',sans-serif; font-weight:700; font-size:14px;
+    background:#fff; border:1.5px solid var(--sky-line); color:var(--leaf-dark); padding:8px 18px; border-radius:999px; cursor:pointer;
+  }
+  .student-card{
+    display:flex; justify-content:space-between; align-items:center; border:1.5px solid var(--sky-line);
+    border-radius:12px; padding:12px 16px; margin-bottom:8px; cursor:pointer; background:#FBFEFF;
+  }
+  .student-card.current{ border-color:var(--leaf); background:var(--leaf-light); }
+  .student-card .name{ font-family:'Baloo 2',sans-serif; font-weight:700; color:var(--leaf-dark); }
+  .student-card .del{ color:var(--coral-dark); font-size:12px; font-weight:700; background:none; border:none; cursor:pointer; }
+  .add-student-btn{
+    width:100%; padding:12px; border:2px dashed var(--sky-line); border-radius:12px; background:none;
+    color:var(--ink-soft); font-family:'Baloo 2',sans-serif; font-weight:600; cursor:pointer; margin:10px 0 20px;
+  }
+  .pin-box{ margin-top:20px; padding-top:16px; border-top:1px solid var(--sky-line); }
+  .pin-box input{ font-size:20px; letter-spacing:6px; padding:8px 12px; border:1.5px solid var(--sky-line); border-radius:10px; width:140px; text-align:center; }
+  .profile-row{ display:flex; gap:10px; align-items:center; margin-bottom:16px; flex-wrap:wrap; }
+  .profile-row input{
+    font-family:'Nunito',sans-serif; font-size:14px; padding:8px 12px; border:1.5px solid var(--sky-line);
+    border-radius:10px; flex:1; min-width:180px;
+  }
+  .stat-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:18px; }
+  .stat-card{ background:var(--leaf-light); border-radius:12px; padding:12px 14px; text-align:center; }
+  .stat-card .num{ font-family:'Baloo 2',sans-serif; font-weight:700; font-size:26px; color:var(--leaf-dark); display:block; }
+  .stat-card .lbl{ font-size:11.5px; color:var(--ink-soft); }
+  .log-table{ width:100%; border-collapse:collapse; font-size:13px; }
+  .log-table th{ text-align:left; padding:6px 10px; background:var(--headerBg,#EAF3E4); border-bottom:2px solid var(--sky-line); position:sticky; top:0; }
+  .log-table td{ padding:6px 10px; border-bottom:1px solid var(--sky-line); }
+  .log-scroll{ max-height:420px; overflow-y:auto; border:1.5px solid var(--sky-line); border-radius:10px; }
+  .swap-list{ display:grid; gap:10px; margin-bottom:16px; }
+  .swap-card{
+    text-align:left; border:1.5px solid var(--sky-line); border-radius:14px; padding:14px 16px;
+    background:#FBFEFF; cursor:pointer; font-family:'Nunito',sans-serif;
+  }
+  .swap-card:hover{ border-color:var(--coral); }
+  .swap-card .t{ font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:var(--coral-dark); display:block; margin-bottom:3px; }
+  .swap-card .s{ font-size:12.5px; color:var(--ink-soft); }
+  .back-link{ background:none; border:none; color:var(--leaf-dark); font-weight:700; cursor:pointer; font-family:'Baloo 2',sans-serif; font-size:13px; padding:0; margin-bottom:14px; }
+
+  /* Progress path — signature element */
+  .path-card{
+    background:var(--paper); border:1.5px solid var(--sky-line); border-radius:18px;
+    padding:16px 18px 18px; margin:22px 0 20px;
+  }
+  .path-label{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px; }
+  .path-label .big{ font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; color:var(--leaf-dark); }
+  .path-label .small{ font-size:13px; color:var(--ink-soft); }
+  .path-strip{ display:flex; gap:3px; overflow-x:auto; padding:4px 2px 10px; scrollbar-width:thin; }
+  .path-caption{ font-size:11.5px; color:var(--ink-soft); margin:4px 2px 0; }
+  .week-node{
+    flex:0 0 auto; width:22px; height:22px; border-radius:50%;
+    background:var(--sky); border:2px solid var(--sky-line);
+    display:flex; align-items:center; justify-content:center;
+    font-size:10px; font-weight:700; color:var(--ink-soft);
+    cursor:pointer; transition:transform .12s ease;
+  }
+  .week-node:hover{ transform:scale(1.15); }
+  .week-node.done{ background:var(--leaf); border-color:var(--leaf-dark); color:#fff; }
+  .week-node.current{ box-shadow:0 0 0 3px var(--sun); }
+
+  /* Day card */
+  .day-card{
+    background:var(--paper); border-radius:20px; border:1.5px solid var(--sky-line);
+    padding:26px 26px 22px;
+  }
+  .day-top{ display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px; margin-bottom:6px; }
+  .day-number{ font-family:'Baloo 2',sans-serif; font-weight:700; font-size:26px; color:var(--coral-dark); }
+  .week-theme{ font-size:15px; color:var(--ink-soft); margin:2px 0 0; }
+  .badges{ display:flex; gap:8px; flex-wrap:wrap; }
+  .badge{ font-size:12px; font-weight:700; padding:4px 12px; border-radius:999px; background:var(--leaf-light); color:var(--leaf-dark); }
+
+  .bible-box{
+    margin:16px 0; padding:10px 14px; background:#FFF7EA; border-left:4px solid var(--sun);
+    border-radius:8px; font-size:13.5px;
+  }
+  .bible-box b{ color:var(--sun-dark); }
+  .trip-box{
+    margin:10px 0 18px; padding:10px 14px; background:var(--coral-light); border-left:4px solid var(--coral);
+    border-radius:8px; font-size:13.5px;
+  }
+  .trip-box b{ color:var(--coral-dark); }
+
+  .subjects{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-top:6px; }
+  .subject{
+    border:1.5px solid var(--sky-line); border-radius:14px; padding:14px 14px 12px;
+    background:#FBFEFF; transition:background .15s ease, border-color .15s ease;
+  }
+  .subject.checked{ background:var(--leaf-light); border-color:var(--leaf); }
+  .subject-head{ display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+  .subject-head label{ font-family:'Baloo 2',sans-serif; font-weight:600; font-size:14px; color:var(--leaf-dark); cursor:pointer; }
+  .subject-head input{ width:18px; height:18px; accent-color:var(--leaf); cursor:pointer; flex-shrink:0; }
+  .subject p{ margin:0; font-size:13.5px; line-height:1.4; color:var(--ink); }
+
+  .nav{ display:flex; justify-content:space-between; align-items:center; margin-top:22px; gap:10px; }
+  .nav button{
+    font-family:'Baloo 2',sans-serif; font-weight:600; font-size:14px;
+    background:var(--leaf); color:#fff; border:none; padding:11px 20px; border-radius:999px;
+    cursor:pointer;
+  }
+  .nav button:disabled{ background:#C9C6BE; cursor:not-allowed; }
+  .nav button:hover:not(:disabled){ background:var(--leaf-dark); }
+  .jump{ font-size:13px; color:var(--ink-soft); text-align:center; }
+  .jump button{ background:none; border:none; color:var(--coral-dark); font-weight:700; cursor:pointer; text-decoration:underline; font-family:inherit; font-size:13px; padding:0; }
+
+  footer{ text-align:center; margin-top:26px; font-size:12px; color:var(--ink-soft); }
+  .app-info{
+    margin-top:16px; padding:12px 16px; background:var(--paper); border:1.5px solid var(--sky-line);
+    border-radius:14px; font-size:12.5px; color:var(--ink-soft); line-height:1.5;
+  }
+  .app-info a{ color:var(--leaf-dark); font-weight:700; }
+  @media (max-width:520px){ .day-card{ padding:18px 16px; } }
+  @media print{
+    body{ background:#fff; }
+    .track-switch, .path-card, .nav, .app-info, footer, .print-btn, .swap-toggle-btn, .attendance-toggle-btn, .student-btn{ display:none !important; }
+    .wrap{ max-width:100%; padding:0; }
+    .day-card{ border:none; padding:0; }
+    a{ color:inherit; text-decoration:none; }
+    a[href]:after{ content:" (" attr(href) ")"; font-size:10px; color:#666; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Kindergarten Ready</h1>
+    <p class="tagline">Day-by-day, click and go</p>
+    <button id="studentQuickBtn" class="student-btn">👤 <span id="studentQuickLabel">Student 1</span> ▾</button>
+    <div class="track-switch">
+      <button id="trackABtn" class="track-btn active">Explorers (ages 3–4)</button>
+      <button id="trackBBtn" class="track-btn">Achievers (ages 5–6)</button>
+    </div>
+    <div style="margin-top:10px;">
+      <button id="swapBtn" class="swap-toggle-btn">🎉 Holiday swap weeks</button>
+      <button id="attendanceBtn" class="attendance-toggle-btn">📋 Attendance &amp; Student Info</button>
+    </div>
+  </header>
+
+  <div class="path-card">
+    <div class="path-label">
+      <span class="big" id="progressLabel">Day 1 of 180</span>
+      <span class="small" id="progressPct">0% complete</span>
+    </div>
+    <div class="path-strip" id="pathStrip"></div>
+    <p class="path-caption">Each circle is one <b>week</b> (1–36), not a day — tap one to jump straight to it. Use the Previous/Next buttons below to move day by day.</p>
+  </div>
+
+  <div class="day-card" id="dayCard"></div>
+
+  <div class="app-info">
+    <b>App time options:</b> <a href="https://www.khanacademy.org/kids" target="_blank">Khan Academy Kids</a> (free, no ads — progress shows as checkmarks in the app) &nbsp;·&nbsp; <a href="https://www.teachyourmonster.org" target="_blank">Teach Your Monster to Read</a> (free, homeschool account with a real time/progress tracker — best if you want to log time). Story time works with a physical book or an official read-aloud video too.
+  </div>
+
+  <div class="nav">
+    <button id="prevBtn">← Previous day</button>
+    <div class="jump"><button id="resumeBtn">Resume where I left off</button> · <button id="printBtn" class="print-btn">Print this day</button></div>
+    <button id="nextBtn">Next day →</button>
+  </div>
+
+  <footer>Progress is saved automatically in this browser. Print any day from your browser's print menu.</footer>
+</div>
+
+<script>
+const WEEKS = [{"n":1,"letter":"Aa","theme":"All About Me","number":1,"craft":"Trace your child's hand and foot to make a paper 'All About Me' poster","sensory":"Mirror play — name eyes, nose, mouth, hair while looking in a mirror","gross":"Simon Says using body parts (touch your nose, hop on one foot)","bible":{"trait":"Belonging","ref":"Psalm 139:14","child":"God made me on purpose, and He made me special."},"fieldTrip":"Visit a local park or playground — a great spot to be around other people and practice sharing space.","book":{"title":"I Like Myself!","author":"Karen Beaumont"}},{"n":2,"letter":"Bb","theme":"Bugs & Bees","number":2,"craft":"Egg-carton caterpillar craft, painted and decorated","sensory":"Bug hunt outside with a magnifying glass, or a dry rice 'bug dig' bin with plastic bugs","gross":"Pretend to be bees — buzz around the yard and 'land' on a flower (hula hoop) when music stops","bible":{"trait":"Wonder","ref":"Genesis 1:24–25","child":"God made every kind of creature, even the tiny ones."},"fieldTrip":"Take a nature walk or visit a garden to go on a real bug hunt.","book":{"title":"The Very Hungry Caterpillar","author":"Eric Carle"}},{"n":3,"letter":"Cc","theme":"Colors","number":3,"craft":"Color-sorting collage — cut and glue pictures by color from magazines","sensory":"Color mixing with washable paint or colored water in clear cups","gross":"Color scavenger hunt — find 3 things of each color around the house","bible":{"trait":"Praise","ref":"Genesis 1","child":"God made a world full of color, and it was good."},"fieldTrip":"Head to the grocery store and find one item of every color in the produce section.","book":{"title":"Brown Bear, Brown Bear, What Do You See?","author":"Bill Martin Jr."}},{"n":4,"letter":"Dd","theme":"Dinosaurs","number":4,"craft":"Salt dough dinosaur fossil — press plastic dinosaur into dough to leave a print","sensory":"Dinosaur egg dig — freeze small toys in ice, 'excavate' with a spoon and warm water","gross":"Dinosaur stomp walk — move like different dinosaurs (stomp, fly, slither)","bible":{"trait":"Wonder","ref":"Genesis 1:24–25","child":"God thought up every animal, even the big ones."},"fieldTrip":"Visit a library or museum with a dinosaur book display or exhibit, if one's nearby.","book":{"title":"How Do Dinosaurs Say Good Night?","author":"Jane Yolen"}},{"n":5,"letter":"Ee","theme":"Emotions","number":5,"craft":"Paper plate emotion faces — happy, sad, angry, surprised, scared","sensory":"Emotion charades — act out a feeling, guess which one","gross":"Freeze dance — freeze in a pose that shows a feeling when music stops","bible":{"trait":"Comfort","ref":"Psalm 34:18","child":"God is close to me when I feel sad or scared."},"fieldTrip":"People-watch at a park or restaurant and gently practice naming feelings you notice.","book":{"title":"The Way I Feel","author":"Janan Cain"}},{"n":6,"letter":"Ff","theme":"Farm Animals","number":6,"craft":"Paper bag farm animal puppet (cow, pig, or sheep)","sensory":"Farm animal sound matching game, or a 'muddy pig' sensory bin with brown-dyed rice","gross":"Animal walk relay — waddle like a duck, gallop like a horse, hop like a bunny","bible":{"trait":"Obedience","ref":"Genesis 6–9","child":"Noah obeyed God even when it was hard, and God kept him safe."},"fieldTrip":"Visit a local farm, petting zoo, or farmers market.","book":{"title":"Big Red Barn","author":"Margaret Wise Brown"}},{"n":7,"letter":"Gg","theme":"Garden & Growing","number":7,"craft":"Plant a real seed in a cup and start a growth journal","sensory":"Dig in dirt or sand looking for 'seeds' (beans), then sort by size","gross":"Pretend to be a seed — curl up small, then 'grow' into a tall stretching plant","bible":{"trait":"Caretaking","ref":"Genesis 2:15","child":"God gave people a garden to take care of."},"fieldTrip":"Visit a garden center, plant nursery, or community garden.","book":{"title":"The Tiny Seed","author":"Eric Carle"}},{"n":8,"letter":"Hh","theme":"Homes & Habitats","number":8,"craft":"Build a house out of blocks, then draw your own house","sensory":"Sort toy animals by the habitat they live in (water, forest, desert)","gross":"Habitat freeze — move like an animal from a called-out habitat","bible":{"trait":"Safety","ref":"Psalm 91:1","child":"God is like a safe shelter I can always run to."},"fieldTrip":"Take a walk around the neighborhood and compare different types of homes.","book":{"title":"A House for Hermit Crab","author":"Eric Carle"}},{"n":9,"letter":"Review","theme":"Fall Harvest Review (Letters A–H, Numbers 1–8)","number":null,"craft":"Make an apple-stamp letter poster using letters learned so far","sensory":"Leaf sorting and counting from a nature walk","gross":"Letter hop — write letters A–H on paper, child hops to the one you call out","bible":{"trait":"Thankfulness","ref":"Psalm 100:4","child":"It's good to say thank you to God for what I have."},"fieldTrip":"Visit a pumpkin patch or apple orchard, if in season.","book":{"title":"Fletcher and the Falling Leaves","author":"Julia Rawlinson"}},{"n":10,"letter":"Ii","theme":"Insects & Icky Bugs","number":9,"craft":"Egg-carton ladybug craft with dot stickers","sensory":"Ice cube bug freeze — freeze plastic insects in ice, melt them out","gross":"Ladybug crawl race on hands and knees","bible":{"trait":"Attentiveness","ref":"Proverbs 6:6","child":"Even a tiny ant can teach us something if we watch closely."},"fieldTrip":"Take a nature trail walk and go on another bug hunt — compare what you find to Week 2.","book":{"title":"The Very Busy Spider","author":"Eric Carle"}},{"n":11,"letter":"Jj","theme":"Jungle Animals","number":10,"craft":"Paper plate lion mask with yarn or paper-strip mane","sensory":"Jungle sensory bin with green rice/shredded paper and toy animals","gross":"Jungle animal obstacle course — swing arms like a monkey, stomp like an elephant","bible":{"trait":"Courage","ref":"Daniel 6","child":"Daniel trusted God even when he was afraid, and God took care of him."},"fieldTrip":"Visit the zoo and look for jungle animals specifically.","book":{"title":"Dear Zoo","author":"Rod Campbell"}},{"n":12,"letter":"Kk","theme":"Kindness & Community Helpers","number":11,"craft":"Make thank-you cards for a community helper (mail carrier, doctor, firefighter)","sensory":"Dress-up and role-play different community helper jobs","gross":"Kindness bean bag toss — say something kind before each toss","bible":{"trait":"Kindness","ref":"John 13:34","child":"God wants me to love and be kind to others."},"fieldTrip":"Visit a fire station, post office, or police station to meet real community helpers.","book":{"title":"Last Stop on Market Street","author":"Matt de la Peña"}},{"n":13,"letter":"Ll","theme":"Leaves & Land Animals","number":12,"craft":"Leaf rubbing art with crayons and real leaves","sensory":"Sort collected leaves by size, color, and shape","gross":"Leaf pile jump — rake and jump in a leaf pile, or crumple paper leaves","bible":{"trait":"Patience","ref":"Ecclesiastes 3:1","child":"God has a right time for everything, like seasons changing."},"fieldTrip":"Take a nature walk and collect leaves to compare colors and shapes.","book":{"title":"Leaf Man","author":"Lois Ehlert"}},{"n":14,"letter":"Mm","theme":"My Family","number":13,"craft":"Family portrait drawing or a paper-plate family tree","sensory":"Sort family photos by who is in them, count family members","gross":"Family-themed Simon Says (hug like grandma, wave like baby)","bible":{"trait":"Honor","ref":"Exodus 20:12","child":"God wants me to love and honor my family."},"fieldTrip":"Plan an outing with extended family — grandparents, cousins, aunts, or uncles.","book":{"title":"The Family Book","author":"Todd Parr"}},{"n":15,"letter":"Review","theme":"Gratitude & Giving Week","number":null,"craft":"Make a gratitude chain — one paper link per thing your child is thankful for","sensory":"Sort and count items to donate to a local shelter or food pantry","gross":"Group cooperation game — pass a ball around a circle naming something you're grateful for","bible":{"trait":"Gratitude","ref":"1 Thessalonians 5:18","child":"I can thank God in every kind of day."},"fieldTrip":"Take a trip to drop off a donation at a local food pantry or shelter.","book":{"title":"The Thankful Book","author":"Todd Parr"}},{"n":16,"letter":"Nn","theme":"Nocturnal Animals","number":14,"craft":"Black paper + white chalk night sky and owl craft","sensory":"Flashlight shadow play in a darkened room","gross":"Nighttime animal freeze dance with flashlights instead of lights","bible":{"trait":"Trust","ref":"Psalm 121:3–4","child":"God never falls asleep — He's always watching over me, even at night."},"fieldTrip":"Go on an evening walk to look at the night sky, or visit a planetarium if one's available.","book":{"title":"Goodnight, Owl!","author":"Pat Hutchins"}},{"n":17,"letter":"Oo","theme":"Ocean Life","number":15,"craft":"Paper plate octopus with paper-strip legs","sensory":"Ocean sensory bin — blue water beads or water with toy sea animals","gross":"'Swim' like different sea creatures across the room","bible":{"trait":"Trust","ref":"Jonah 1–2","child":"Even when Jonah made a mistake, God still heard him and helped him."},"fieldTrip":"Visit an aquarium, or the fish section of a pet store.","book":{"title":"Rainbow Fish","author":"Marcus Pfister"}},{"n":18,"letter":"Review","theme":"Winter Holidays Around the World","number":null,"craft":"Snowflake cutting practice with paper and safety scissors","sensory":"Fake snow sensory bin (shaving cream or baking soda + oil)","gross":"Freeze like a snowman when the music stops","bible":{"trait":"Joy","ref":"Luke 2","child":"God sent Jesus as a gift of great joy for everyone."},"fieldTrip":"Drive or walk around to see neighborhood holiday lights and decorations.","book":{"title":"The Mitten","author":"Jan Brett"}},{"n":19,"letter":"Pp","theme":"Pets","number":16,"craft":"Paper plate puppy or kitten face craft","sensory":"Practice gentle touch with a stuffed animal, talk about pet care","gross":"Pretend to be different pets — bark, meow, hop like a bunny","bible":{"trait":"Gentleness","ref":"Proverbs 12:10","child":"God wants me to be gentle and take good care of animals."},"fieldTrip":"Visit a pet store and talk about how to be gentle with animals.","book":{"title":"Go, Dog. Go!","author":"P.D. Eastman"}},{"n":20,"letter":"Qq","theme":"Quiet Time & Questions","number":17,"craft":"Make a 'question jar' — decorate a jar to hold curiosity questions","sensory":"Quiet listening walk — name every sound you hear outside","gross":"Whisper tag — play tag using only whispers","bible":{"trait":"Stillness","ref":"Psalm 46:10","child":"It's good to be still and quiet sometimes and just notice God."},"fieldTrip":"Visit the library for a quiet reading hour.","book":{"title":"The Quiet Book","author":"Deborah Underwood"}},{"n":21,"letter":"Rr","theme":"Rainbows & Weather","number":18,"craft":"Coffee-filter rainbow craft with washable markers and water","sensory":"Weather sorting — pictures of sunny, rainy, snowy, cloudy days, sort and discuss","gross":"Rain, rain dance — move like rain, wind, sunshine, and snow","bible":{"trait":"Promise-keeping","ref":"Genesis 9:13","child":"God put a rainbow in the sky as a promise He keeps forever."},"fieldTrip":"Take a walk after rain to look for puddles and, if you're lucky, a rainbow.","book":{"title":"Cloudy with a Chance of Meatballs","author":"Judi Barrett"}},{"n":22,"letter":"Review","theme":"Winter Review (Letters I–R, Numbers 9–18)","number":null,"craft":"Letter and number matching memory game with cards","sensory":"Counting review with any small collected items (buttons, blocks)","gross":"Number hop — write numbers 1–18 on paper, hop to the one called out","bible":{"trait":"Trust","ref":"Proverbs 3:5–6","child":"I can trust God to help me even when I don't understand everything."},"fieldTrip":"Visit an indoor play space or the library on a cold day.","book":{"title":"The Snowy Day","author":"Ezra Jack Keats"}},{"n":23,"letter":"Ss","theme":"Space","number":19,"craft":"Paper plate rocket ship or paper star craft","sensory":"Black paper + white paint 'flick' painting for a starry sky","gross":"Astronaut moonwalk and 'floating' movement game","bible":{"trait":"Wonder","ref":"Psalm 8:3","child":"God made every star, and He knows each one by name."},"fieldTrip":"Visit a planetarium, or go stargazing together after dark.","book":{"title":"How to Catch a Star","author":"Oliver Jeffers"}},{"n":24,"letter":"Tt","theme":"Transportation","number":20,"craft":"Cardboard box car or toilet-paper-roll train craft","sensory":"Sort toy vehicles by type (air, land, water)","gross":"Move like different vehicles — zoom like a car, chug like a train, fly like a plane","bible":{"trait":"Guidance","ref":"Proverbs 16:9","child":"I can make plans, and God helps guide my steps."},"fieldTrip":"Watch vehicles go by at a train station, airport viewing area, or busy street corner.","book":{"title":"Freight Train","author":"Donald Crews"}},{"n":25,"letter":"Uu","theme":"Under the Sea","number":null,"craft":"Handprint fish craft on blue paper 'ocean'","sensory":"Counting review — count fish crackers or fish cutouts to 20","gross":"Under/over game — crawl under and jump over pillows like swimming through a reef","bible":{"trait":"Peace","ref":"Mark 4:39","child":"Jesus can calm even the biggest storm — and my biggest worries."},"fieldTrip":"Revisit the aquarium or pet store, focusing on animals that live under the sea.","book":{"title":"Mister Seahorse","author":"Eric Carle"}},{"n":26,"letter":"Vv","theme":"Vegetables & Healthy Food","number":null,"craft":"Vegetable stamp painting using cut vegetables and paint","sensory":"Sort plastic play food into healthy vs. treat categories","gross":"Shape hop — hop between paper shapes cut from the vegetable theme","bible":{"trait":"Provision","ref":"Genesis 1:29","child":"God gives good food to keep me strong and healthy."},"fieldTrip":"Visit a grocery store or farmers market and go on a vegetable scavenger hunt.","book":{"title":"Growing Vegetable Soup","author":"Lois Ehlert"}},{"n":27,"letter":"Ww","theme":"Weather & Seasons","number":null,"craft":"Four-season tree craft — one tree, four looks (blossoms, leaves, bare, snow)","sensory":"Weather-themed sensory bins rotated through the week","gross":"Shape freeze dance — freeze in a shape pose when music stops","bible":{"trait":"Patience","ref":"Ecclesiastes 3:1","child":"There's a right time for everything, and God is never in a hurry."},"fieldTrip":"Take a short walk each day this week and track the weather you observe.","book":{"title":"Come On, Rain!","author":"Karen Hesse"}},{"n":28,"letter":"Review","theme":"Kindness Week (Valentine's theme)","number":null,"craft":"Make simple valentines for family members","sensory":"Heart sorting by size and color","gross":"Kindness relay — carry a 'heart' bean bag to a friend and say something kind","bible":{"trait":"Love","ref":"Mark 12:31","child":"God wants me to love my neighbor the way I love myself."},"fieldTrip":"Deliver handmade cards to a neighbor, grandparent, or senior center.","book":{"title":"Guess How Much I Love You","author":"Sam McBratney"}},{"n":29,"letter":"Xx","theme":"My Body & Bones","number":null,"craft":"Q-tip skeleton craft on black paper","sensory":"Simple pattern-making with two colors of blocks or beads","gross":"Body part patterns — clap, stomp, clap, stomp in a repeating pattern","bible":{"trait":"Belonging","ref":"Psalm 139:14","child":"Every part of me was made carefully and on purpose."},"fieldTrip":"Visit a playground and focus on climbing, balancing, and moving your whole body.","book":{"title":"From Head to Toe","author":"Eric Carle"}},{"n":30,"letter":"Yy","theme":"Yarn, Yellow & Textures","number":null,"craft":"Yarn-wrapped craft stick weaving, or a texture collage (soft, rough, bumpy)","sensory":"Texture bin — feel and sort soft, rough, smooth, bumpy items blindfolded","gross":"Pattern hopscotch using yellow and another color","bible":{"trait":"Creativity","ref":"Exodus 31:1–5","child":"God gives people skill to make beautiful things."},"fieldTrip":"Visit a craft or fabric store and feel as many different textures as you can find.","book":{"title":"Pat the Bunny","author":"Dorothy Kunhardt"}},{"n":31,"letter":"Zz","theme":"Zoo Animals","number":null,"craft":"Paper bag zoo animal of choice","sensory":"Zoo animal sound and movement matching","gross":"Zoo train — line up and move like different zoo animals in a line","bible":{"trait":"Naming/Wonder","ref":"Genesis 2:19–20","child":"God let the first person help name all the animals — what a fun job!"},"fieldTrip":"Visit the zoo, focusing on animals whose names you've learned all year.","book":{"title":"1, 2, 3 to the Zoo","author":"Eric Carle"}},{"n":32,"letter":"Review","theme":"Alphabet Review Week","number":null,"craft":"Alphabet scavenger hunt around the house","sensory":"Letter sound sorting — beginning sound matching game","gross":"Giant floor alphabet hopscotch, hop and say the letter sound","bible":{"trait":"God's Word","ref":"Psalm 119:105","child":"God's Word is like a light that helps me know the right way to go."},"fieldTrip":"Visit the library and go on a scavenger hunt for books starting with different letters.","book":{"title":"Chicka Chicka Boom Boom","author":"Bill Martin Jr. & John Archambault"}},{"n":33,"letter":"Review","theme":"Number Review Week (1–20)","number":null,"craft":"Make a number line poster 1–20 to hang on the wall","sensory":"Counting collections — count anything in groups of 5s and 10s","gross":"Number hop to 20 on a chalk or paper number line","bible":{"trait":"Belonging","ref":"Luke 12:7","child":"God knows me so well, He even knows how many hairs are on my head."},"fieldTrip":"Visit a grocery store and count items together as you place them in the cart.","book":{"title":"Ten Black Dots","author":"Donald Crews"}},{"n":34,"letter":"Review","theme":"Community Helpers & Field Trip Week","number":null,"craft":"Draw a picture of what you want to be when you grow up","sensory":"Role-play a community helper visit (post office, grocery store, doctor)","gross":"Community helper charades","bible":{"trait":"Service","ref":"Galatians 5:13","child":"God wants me to use my hands to help and serve others."},"fieldTrip":"Visit a fire station, library, or grocery store and meet the helpers who work there.","book":{"title":"Career Day","author":"Anne Rockwell"}},{"n":35,"letter":"Review","theme":"Kindergarten Bootcamp: Following Directions & Independence","number":null,"craft":"Decorate a backpack tag or practice packing a backpack independently","sensory":"Practice zipping, buttoning, and shoe-tying stations","gross":"Simon Says with multi-step directions (touch your head, then clap twice, then sit down)","bible":{"trait":"Obedience","ref":"Colossians 3:20","child":"Obeying my parents is one way I can obey and please God."},"fieldTrip":"Visit a restaurant and practice ordering, waiting, and saying please and thank you.","book":{"title":"David Goes to School","author":"David Shannon"}},{"n":36,"letter":"Review","theme":"Kindergarten Bootcamp: Celebration & Portfolio Review","number":null,"craft":"Make a 'This is what I learned' portfolio cover with favorite artwork inside","sensory":"Review favorite sensory activity from the whole year, child's choice","gross":"Class parade / graduation walk with a homemade cap","bible":{"trait":"Thankfulness","ref":"Psalm 118:24","child":"Today is a gift from God — a good day to be glad and thankful."},"fieldTrip":"Plan a 'graduation outing' — let your child pick the place to celebrate the year.","book":{"title":"The Kissing Hand","author":"Audrey Penn"}}];
+const SWAP_WEEKS = [{"title":"Martin Luther King Jr. & Black History Month","book":{"title":"Martin's Big Words: The Life of Dr. Martin Luther King, Jr.","author":"Doreen Rappaport"},"suggestedSwap":"Swap in for any week in January (around MLK Day) or extend into February for Black History Month.","kScopeIndex":19,"theme":"Kindness, fairness, and helpers who changed history","craft":"Make a 'dream cloud' craft — child draws or dictates one kind thing they hope for the world","sensory":"Mix paint or playdough to different skin-tone shades while talking about how everyone is different and everyone is special","gross":"'Kindness and fairness' freeze dance — freeze in a pose showing a kind action (helping hand, hug, handshake)","bible":{"trait":"Fairness & love","ref":"Genesis 1:27","child":"God made every single person in His image, so everyone matters and deserves to be treated kindly."},"fieldTrip":"Visit your local library and ask a librarian to recommend a picture book about a hero from Black history.","notes":"Introduce Dr. Martin Luther King Jr. very simply: he taught that everyone should be treated fairly and kindly, no matter what they look like. If extending into February, add a couple of other simple, age-appropriate figures from Black history (for example Ruby Bridges or Harriet Tubman) as 'brave helpers' stories."},{"title":"Mother's Day","book":{"title":"The Runaway Bunny","author":"Margaret Wise Brown"},"suggestedSwap":"Swap in for the week that lands on or just before Mother's Day (second Sunday of May).","kScopeIndex":33,"theme":"Celebrating Mom","craft":"Make a handmade card or paper flower bouquet for Mom or a mother figure","sensory":"Flower smelling/sorting bin — real or paper flowers, sort by color and scent","gross":"'Helping hands' game — practice a few simple chores as a way of helping Mom","bible":{"trait":"Honor & gratitude","ref":"Exodus 20:12","child":"God tells us to honor our mom and dad — moms are a gift to love and be thankful for."},"fieldTrip":"Visit a flower shop or garden center together to pick out something small for Mom, or take a walk somewhere she loves.","notes":"A gentle week for children without a mom in the picture — feel free to broaden it to 'special women in our life' (grandma, aunt, teacher)."},{"title":"Memorial Day","book":{"title":"H is for Honor: A Military Family Alphabet","author":"Devin Scillian"},"suggestedSwap":"Swap in for the week of the last Monday in May.","kScopeIndex":34,"theme":"Thank-you for helpers and heroes","craft":"Make a simple red-white-and-blue flag or star craft","sensory":"Sort and count red, white, and blue objects around the house","gross":"Backyard parade march with homemade flags or streamers","bible":{"trait":"Courage & gratitude","ref":"John 15:13","child":"The bravest kind of love is when someone gives everything to keep others safe — that's worth saying thank you for."},"fieldTrip":"Visit a local memorial, veterans' event, or cemetery to pay respects, if one is nearby.","notes":"Keep it simple and age-appropriate: this is a 'say thank you to brave helpers' week rather than a detailed history lesson."},{"title":"Easter","book":{"title":"The Story of Easter","author":"Patricia A. Pingry"},"suggestedSwap":"Swap in for the week of Easter (date changes each year — check your calendar).","kScopeIndex":30,"theme":"New life and springtime","craft":"Empty-tomb craft — a paper cave with a rolled 'stone' that moves aside, or a butterfly life-cycle craft","sensory":"Egg matching and counting activity; plant a fast-sprouting seed to watch new life grow","gross":"Bunny hop and butterfly flutter races across the yard","bible":{"trait":"Hope","ref":"Luke 24:6","child":"Jesus loves us so much that He came back to life — that means we can always have hope."},"fieldTrip":"Take a walk to look for signs of spring — new leaves, flowers, or baby animals.","notes":"Keep the retelling brief and gentle for this age: Jesus died, but He came back to life, and that's the best news, showing us God's love never ends."},{"title":"St. Patrick's Day","book":{"title":"Jamie O'Rourke and the Big Potato","author":"Tomie dePaola"},"suggestedSwap":"Swap in for the week of March 17th.","kScopeIndex":27,"theme":"Shamrocks and being thankful","craft":"Three-leaf shamrock craft using green paper or paint","sensory":"Green sensory bin (dyed rice or shredded paper) with a 'gold coin' hunt","gross":"Follow-the-rainbow hopscotch or a color hunt around the yard","bible":{"trait":"Thankfulness","ref":"Psalm 100:4","child":"Saint Patrick loved to teach others about God — this week we practice saying thank you for the good things God made, like the color green of spring."},"fieldTrip":"Visit a park and go on a 'green scavenger hunt' for as many different shades of green in nature as you can find.","notes":"Saint Patrick was a real missionary who used a three-leaf shamrock to explain simple truths about God. For this age, keep it light: a thankfulness and springtime week with a fun bit of history."}];
+const KSCOPE = [{"sounds":"s, a, t, p","words":"sat, pat, tap, sap, at","sight":"the, a","math":"K.CC.1-2: rote count to 20 by ones; write numerals 0-5","writing":"Trace and copy your name plus the words 'I am'","logic":"Sort objects by one attribute (color)"},{"sounds":"i, n, m, d","words":"sit, pin, dip, man, mad, tin","sight":"I, to","math":"Write numerals 6-10; count objects to 10 with 1:1 correspondence","writing":"Label a drawing with one CVC word","logic":"'Which one doesn't belong' (3 same, 1 different)"},{"sounds":"g, o, c, k","words":"dog, cot, got, dot, cog, kit","sight":"is, my","math":"Count to 20 with 1:1 correspondence; compare two groups (more/fewer)","writing":"Copy a simple CVC word under a matching picture","logic":"Same/different matching pairs"},{"sounds":"ck, e, u, r","words":"duck, sock, red, run, sun, rut","sight":"you, are","math":"Write numerals 11-15; count to 100 by tens","writing":"Write 2-3 CVC words independently from memory","logic":"Complete an AB pattern (color or shape)"},{"sounds":"h, b, f, l","words":"hat, big, fun, log, hen, bat","sight":"said, of","math":"Write numerals 16-20; count to 30 by ones","writing":"Draw a picture of yourself and dictate/write one sentence","logic":"Sort a group of objects by two attributes at once"},{"sounds":"review s-l; digraph ch","words":"chat, much, chip, chop","sight":"he, she","math":"K.OA.1: model addition with objects, sums to 5","writing":"Copy a 3-word sentence with correct spacing","logic":"Put a 3-step daily routine in order"},{"sounds":"digraphs sh, th","words":"ship, shop, fish, thin, this, that","sight":"we, was","math":"K.OA.2: solve addition word problems within 5 using objects","writing":"Write a 3-word sentence independently","logic":"Picture-based 'odd one out' reasoning"},{"sounds":"j, v, w, x","words":"jam, van, wet, box, jet, wig","sight":"they, be","math":"K.OA.1-2: model subtraction with objects within 5","writing":"Label three items in a themed scene","logic":"Extend a growing pattern (AAB)"},{"sounds":"y, z, qu + Quarter 1 review","words":"yes, zip, quit + mixed review words","sight":"Review all 16 sight words so far","math":"Quarter 1 review: count/write 0-20, compare quantities","writing":"Write your name and one full simple sentence unassisted","logic":"Quarter 1 review: sorting, matching, and patterns"},{"sounds":"blends bl, cl, fl","words":"black, clap, flag, flip","sight":"do, does","math":"K.OA.3: decompose 5 into pairs (5=4+1, 5=3+2...)","writing":"Write a 4-word sentence with support","logic":"Continue an ABC pattern"},{"sounds":"blends gr, br, cr, dr","words":"grab, brag, crab, drop","sight":"have, has","math":"K.OA.4: find the number that makes 10 when added to a given number","writing":"Write two related sentences about one picture","logic":"Put a 3-step story in order (beginning/middle/end)"},{"sounds":"blends sn, sp, st, sw","words":"snap, spot, stop, swim","sight":"with, what","math":"K.OA.5: fluently add and subtract within 5","writing":"Write an opinion sentence: 'I like ___ because ___'","logic":"Match causes to their effects"},{"sounds":"final blends -nd, -nt, -mp","words":"hand, tent, jump, lamp","sight":"look, was","math":"K.NBT.1: begin composing teen numbers as ten + extra ones","writing":"Write one informative sentence about this week's topic","logic":"Predict what comes next in a pattern"},{"sounds":"digraph wh; review all digraphs","words":"whip, when, which","sight":"come, some","math":"K.NBT.1: continue composing/decomposing numbers 11-19","writing":"Write a 2-3 sentence mini story with support","logic":"Simple picture maze or path puzzle"},{"sounds":"silent e: a_e","words":"cake, gate, made, tape","sight":"were, there","math":"Compare two numbers using more than/less than/equal to","writing":"Write a short thank-you or gratitude message","logic":"Match each cause to its correct effect"},{"sounds":"silent e: i_e, o_e","words":"bike, time, hope, note","sight":"their, out","math":"K.MD.2: directly compare length (longer/shorter)","writing":"Label a simple diagram with 3-4 words","logic":"Sort objects by two attributes and graph the results"},{"sounds":"silent e: u_e; review all silent-e","words":"cute, tube, mule","sight":"about, then","math":"K.MD.2: directly compare weight (heavier/lighter)","writing":"Write one fact sentence about this week's topic","logic":"Simple picture-grid logic puzzle"},{"sounds":"Quarter 2 review: blends & silent-e","words":"cumulative review words from weeks 10-17","sight":"Review all ~32 sight words so far","math":"Quarter 2 review: addition/subtraction fluency check within 5","writing":"Write a short seasonal or holiday message independently","logic":"Quarter 2 review: patterns, sequencing, cause & effect"},{"sounds":"plural -s, -es","words":"cats, dogs, boxes, dishes","sight":"does, goes","math":"K.MD.1: identify measurable attributes (length, weight, capacity)","writing":"Rewrite 3 singular sentences as plural sentences","logic":"Classify a group of objects into labeled categories"},{"sounds":"-ing endings","words":"running, jumping, reading","sight":"many, much","math":"K.MD.2: directly compare two objects by a measurable attribute","writing":"Write two present-tense action sentences","logic":"Put the steps of a familiar process in order"},{"sounds":"-ed endings (regular past tense)","words":"jumped, played, walked","sight":"because, before","math":"K.MD.3: classify objects into categories and count each; make a simple bar graph","writing":"Rewrite two sentences changing them to past tense","logic":"Trace a short cause-and-effect chain"},{"sounds":"comparatives -er, -est","words":"bigger, biggest, faster, fastest","sight":"after, again","math":"K.G.1: describe the position of shapes (above, below, beside)","writing":"Write a comparison sentence: 'The ___ is bigger than the ___.'","logic":"Comparison-based logic puzzle (biggest to smallest)"},{"sounds":"compound words","words":"sunset, backpack, cupcake","sight":"could, would","math":"K.G.2: name shapes regardless of their size or orientation","writing":"Build a compound word and use it in a sentence","logic":"Compound-word matching puzzle"},{"sounds":"contractions","words":"isn't, can't, don't","sight":"should, other","math":"K.G.3: classify shapes as two-dimensional or three-dimensional","writing":"Use one contraction correctly in a sentence","logic":"Simple rule-based sorting game"},{"sounds":"r-controlled vowels: ar, or","words":"car, star, for, corn","sight":"also, called","math":"K.G.4: analyze and compare shapes by sides and corners","writing":"Write one descriptive sentence using an r-controlled word","logic":"Sort shapes by number of sides"},{"sounds":"r-controlled vowels: er, ir, ur","words":"her, bird, turn","sight":"people, water","math":"K.G.5: build and draw simple shapes","writing":"Write a 3-sentence paragraph about this week's topic with support","logic":"Build-a-shape logic challenge"},{"sounds":"Quarter 3 review: morphology & r-controlled vowels","words":"cumulative review words from weeks 19-26","sight":"Review all ~48 sight words so far","math":"K.G.6: compose a larger shape from smaller shapes; Quarter 3 review","writing":"Write a short paragraph independently, 2-3 sentences","logic":"Quarter 3 review: classification and shape reasoning"},{"sounds":"vowel team ai, ay","words":"rain, day, play, mail","sight":"friend, once","math":"Review: addition/subtraction word problems within 10","writing":"Write 2-3 sentences using a describing word","logic":"Timed pattern-recognition review"},{"sounds":"vowel team ee, ea","words":"tree, seed, read, eat","sight":"upon, always","math":"Enrichment: skip counting by 2s","writing":"Write a sentence with a descriptive adjective","logic":"Sequence-based logic puzzle"},{"sounds":"vowel team oa, ow","words":"boat, road, snow, grow","sight":"never, today","math":"Enrichment: skip counting by 5s","writing":"Write a short descriptive sentence about a texture or feeling","logic":"Sort by texture, size, or another attribute"},{"sounds":"diphthongs oi, oy, ou, ow (cow)","words":"coin, boy, out, cow","sight":"every, other","math":"Comprehensive review: shapes and measurement","writing":"Write a short paragraph about an animal","logic":"Classification review challenge"},{"sounds":"Full phonics review","words":"cumulative review across all sound patterns","sight":"Cumulative review of all ~56 sight words","math":"Comprehensive counting and number review","writing":"Write 3-4 sentences independently on a topic of choice","logic":"Full logic skills review"},{"sounds":"Independent blending: short decodable passages","words":"blend and read a short decodable passage","sight":"Fluency passage reading practice","math":"Comprehensive review: addition and subtraction within 10","writing":"Write and illustrate a short original story","logic":"Multi-step logic puzzle"},{"sounds":"Applied decoding: theme vocabulary","words":"decode multisyllable theme words with support","sight":"Review plus new theme-related words","math":"Real-world word problems (counting money, groceries, etc.)","writing":"Write an independent paragraph: 'When I grow up...'","logic":"Real-world sequencing: steps to complete a task"},{"sounds":"Reading and following written directions","words":"decode and follow a short list of written steps","sight":"Cumulative review","math":"Timed fluency check: addition/subtraction within 10","writing":"Write a simple set of directions for a task","logic":"Complex multi-step logic puzzle"},{"sounds":"Full-year review and informal reading check","words":"cumulative review of all decodable patterns","sight":"Full cumulative sight word review","math":"Full-year math assessment","writing":"Write a reflection paragraph: 'What I learned this year'","logic":"Capstone logic challenge and celebration"}];
+const MUSIC = ["Freeze dance with fast/slow tempo changes","Make a shaker from a bottle and dry rice, practice keeping a beat","Learn a simple clapping pattern and echo it back and forth","Sing the alphabet song while pointing to each letter","Move like an animal to different styles of music (marching, swaying, tiptoeing)","Play 'loud and quiet' — march loudly to drums, tiptoe softly to a lullaby","Create a 'name song' — clap out the syllables in your child's name","Freeze in a shape when the music stops (circle, square, triangle)"];
+const ART = ["Look at a famous painting together and talk about the colors used (try Vincent van Gogh's sunflowers or starry sky)","Talk about a famous artist known for dots and pointillism (Georges Seurat) — recreate with cotton swabs and paint","Look at simple geometric art and talk about shapes and patterns (Piet Mondrian's grid paintings)","Discuss an artist known for bright colors and simple shapes (Henri Matisse's cut-outs) — try a paper cut-out collage","Talk about texture in art — find a sculpture or textured painting and describe how it might feel","Look at a landscape painting and talk about what's near vs. far","Try painting with unusual tools — a sponge, a fork, a cotton ball","Talk about self-portraits, then have your child draw one of themselves"];
+const SPANISH = [{"en":"Colors","words":"rojo (red), azul (blue), amarillo (yellow), verde (green)"},{"en":"Numbers 1–5","words":"uno, dos, tres, cuatro, cinco"},{"en":"Greetings","words":"hola (hello), adiós (goodbye), por favor (please), gracias (thank you)"},{"en":"Family","words":"mamá, papá, hermano (brother), hermana (sister)"},{"en":"Animals","words":"perro (dog), gato (cat), pájaro (bird), pez (fish)"},{"en":"Feelings","words":"feliz (happy), triste (sad), enojado (angry)"},{"en":"Weather","words":"sol (sun), lluvia (rain), nube (cloud), frío (cold)"},{"en":"Shapes","words":"círculo, cuadrado, triángulo, estrella"}];
+const LIFE = ["Practice zipping and buttoning a jacket independently","Set the table together, counting out the right number of plates","Practice pouring water from a small pitcher into a cup","Learn to wash hands properly, singing a 20-second song","Practice putting on shoes and identifying left vs. right","Help sort laundry by color","Practice simple food prep — spreading, stirring, tearing lettuce","Practice cleaning up toys independently when playtime ends"];
+const CIRCLE_TIME = [
+  "Good morning song or greeting",
+  "What day is it? Write today's date in today's calendar box",
+  "What's the weather? Look outside, then draw it in today's calendar box",
+  "Count the days of school so far",
+  "Today's letter and number focus",
+  "One stretch or movement break before starting table time",
+  "Felt board time — add or rearrange a felt piece to match this week's theme (re-sticks with no glue, change it anytime)",
+];
+const STORAGE_KEY = "kr_progress_v2";
+const LAST_DAY_KEY = "kr_last_day_v2";
+const STUDENTS_KEY = "kr_students_v1";
+const CURRENT_STUDENT_KEY = "kr_current_student_v1";
+const PIN_KEY = "kr_parent_pin_v1";
+
+function getStudents() {
+  try {
+    const s = JSON.parse(localStorage.getItem(STUDENTS_KEY));
+    if (s && s.length) return s;
+  } catch(e) {}
+  const def = [{ id: "s1", name: "Student 1" }];
+  localStorage.setItem(STUDENTS_KEY, JSON.stringify(def));
+  return def;
+}
+function saveStudents(list) { localStorage.setItem(STUDENTS_KEY, JSON.stringify(list)); }
+function getCurrentStudentId() {
+  const id = localStorage.getItem(CURRENT_STUDENT_KEY);
+  const students = getStudents();
+  if (id && students.some(s => s.id === id)) return id;
+  localStorage.setItem(CURRENT_STUDENT_KEY, students[0].id);
+  return students[0].id;
+}
+function setCurrentStudentId(id) { localStorage.setItem(CURRENT_STUDENT_KEY, id); }
+function currentStudent() { return getStudents().find(s => s.id === getCurrentStudentId()); }
+function getPin() { return localStorage.getItem(PIN_KEY) || ""; }
+function setPin(pin) { if (pin) localStorage.setItem(PIN_KEY, pin); else localStorage.removeItem(PIN_KEY); }
+
+let currentTrack = localStorage.getItem("kr_track") || "A";
+function progressKey() { return `${STORAGE_KEY}_${getCurrentStudentId()}_${currentTrack}`; }
+function lastDayKey() { return `${LAST_DAY_KEY}_${getCurrentStudentId()}_${currentTrack}`; }
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(progressKey())) || {}; } catch(e) { return {}; }
+}
+function saveProgress(p) {
+  try { localStorage.setItem(progressKey(), JSON.stringify(p)); } catch(e) {}
+}
+let progress = loadProgress();
+
+const KA_LINK = '<a href="https://www.khanacademy.org/kids" target="_blank">Khan Academy Kids</a>';
+const TYM_LINK = '<a href="https://www.teachyourmonster.org" target="_blank">Teach Your Monster to Read</a>';
+function ytLink(title) {
+  const q = encodeURIComponent(title + " read aloud");
+  return `<a href="https://www.youtube.com/results?search_query=${q}" target="_blank">watch a read-aloud</a>`;
+}
+
+function dayContent(week, dayOfWeek) {
+  const isReview = !week.letter || week.letter === "Review";
+  const t = week.theme.toLowerCase();
+  const L = week.letter;
+  const N = week.number;
+  const bookTitle = week.book.title, bookAuthor = week.book.author;
+  switch (dayOfWeek) {
+    case 0: return {
+      name: "Monday", focus: "Letter & theme",
+      jumpstart: isReview ? `${KA_LINK} — free play covering letters/numbers learned so far` : `${KA_LINK} — letter ${L} games: matching, tracing, sound hunt`,
+      handson: week.craft,
+      story: `Read aloud: "${bookTitle}" by ${bookAuthor} — or ${ytLink(bookTitle)}`,
+      skill: isReview ? "Fine motor — review tracing practice" : `Fine motor — tracing letter ${L} and prewriting strokes`,
+    };
+    case 1: return {
+      name: "Tuesday", focus: "Math",
+      jumpstart: N ? `${KA_LINK} — number ${N} games: counting and quantity matching` : `${KA_LINK} — counting and number games`,
+      handson: N ? `Count and sort ${t} themed objects up to ${N}` : `Counting and sorting practice with ${t} themed objects`,
+      story: `Reread "${bookTitle}" — this time count objects on each page`,
+      skill: "Number recognition and one-to-one counting",
+    };
+    case 2: return {
+      name: "Wednesday", focus: "Discovery",
+      jumpstart: `${KA_LINK} — discovery games related to ${t}`,
+      handson: week.sensory,
+      story: `Read a simple fact book or watch a short video about ${t}`,
+      skill: "Vocabulary building and observation",
+    };
+    case 3: return {
+      name: "Thursday", focus: "Art & fine motor",
+      jumpstart: `${KA_LINK} — creative and drawing games`,
+      handson: "Art extension of Monday's craft — add detail, color, or try a second version",
+      story: `Reread "${bookTitle}" once more, or let your child pick a favorite page`,
+      skill: "Scissor practice and pencil grip",
+    };
+    case 4: return {
+      name: "Friday", focus: "Review & play",
+      jumpstart: isReview ? `${KA_LINK} — review quiz covering ${t}` : `${KA_LINK} — review quiz covering letter ${L}${N ? ` and number ${N}` : ""}`,
+      handson: week.gross,
+      story: "Family favorite story — child picks",
+      skill: "Following multi-step directions and turn-taking",
+    };
+  }
+}
+
+function electiveOfDay(weekIdx, dayOfWeek) {
+  switch (dayOfWeek) {
+    case 0: return { label: "Music & movement", activity: MUSIC[weekIdx % MUSIC.length] };
+    case 1: { const sp = SPANISH[weekIdx % SPANISH.length]; return { label: "Intro Spanish", activity: sp.en + ": " + sp.words }; }
+    case 2: return { label: "Art appreciation", activity: ART[weekIdx % ART.length] };
+    case 3: return { label: "Life skills", activity: LIFE[weekIdx % LIFE.length] };
+    case 4: return { label: "Child's choice", activity: "Revisit a favorite elective from this week" };
+  }
+}
+
+function quarterOf(weekIdx) { return Math.min(3, Math.floor(weekIdx / 9)); }
+
+function dayContentB(week, weekIdx, dayOfWeek) {
+  const t = week.theme.toLowerCase();
+  const k = KSCOPE[weekIdx];
+  const bookTitle = week.book.title, bookAuthor = week.book.author;
+  switch (dayOfWeek) {
+    case 0: return {
+      name: "Monday", focus: "Phonics & decoding",
+      appTime: `${TYM_LINK} — play the next level, practicing this week's sounds: ${k.sounds}`,
+      jumpstart: `New sounds this week: ${k.sounds}. Practice blending: ${k.words}`,
+      handson: `Practice writing today's new sight words: ${k.sight}`,
+      story: `Read aloud: "${bookTitle}" by ${bookAuthor} (${ytLink(bookTitle)}) — spot any letters or sounds you know`,
+      skill: "Decoding & sight word recognition",
+    };
+    case 1: return {
+      name: "Tuesday", focus: "Math",
+      appTime: `${KA_LINK} — play the Math path activities for today's focus`,
+      jumpstart: k.math,
+      handson: `Practice this with real counters or objects${week.number ? `, working with groups of ${week.number}` : ""}, tied to ${t}`,
+      story: `Reread "${bookTitle}" and count how many times a target word appears`,
+      skill: "Number sense & operations",
+    };
+    case 2: return {
+      name: "Wednesday", focus: "Reading comprehension & science",
+      appTime: `${KA_LINK} — pick a nonfiction book or video from the Library about ${t}`,
+      jumpstart: `Read a nonfiction book about ${t}; answer who/what/where questions (RI.K.1)`,
+      handson: `Write or dictate 3 facts you learned about ${t} today`,
+      story: `Read a fact book or watch a short video about ${t}`,
+      skill: "Comprehension & vocabulary",
+    };
+    case 3: return {
+      name: "Thursday", focus: "Writing",
+      appTime: `${KA_LINK} — try the Reading & Writing path activities`,
+      jumpstart: k.writing,
+      handson: `Illustrate your writing with a picture about ${t}`,
+      story: `Child's choice — reread "${bookTitle}" or a favorite from this week`,
+      skill: "Written expression & sentence construction",
+    };
+    case 4: return {
+      name: "Friday", focus: "Logic & review",
+      appTime: `${TYM_LINK} — replay this week's level for review, or try Khan Academy Kids' Logic+ games`,
+      jumpstart: k.logic,
+      handson: week.gross,
+      story: "Family favorite story — child picks",
+      skill: "Critical thinking & weekly review",
+    };
+  }
+}
+
+function loadCurrentDay() {
+  const v = parseInt(localStorage.getItem(lastDayKey()));
+  return (isNaN(v) || v < 0 || v > 179) ? 0 : v;
+}
+let currentDay = loadCurrentDay();
+if (isNaN(currentDay) || currentDay < 0 || currentDay > 179) currentDay = 0;
+
+function weekOfDay(d) { return Math.floor(d / 5); }
+function keysForTrack(track) {
+  return track === "A"
+    ? ["circle","jumpstart","handson","story","skill","elective"]
+    : ["circle","appTime","jumpstart","handson","story","skill","elective"];
+}
+
+function isWeekDone(wIdx) {
+  const keys = keysForTrack(currentTrack);
+  for (let i = 0; i < 5; i++) {
+    const d = wIdx * 5 + i;
+    const p = progress[d];
+    if (!p) return false;
+    for (const k of keys) if (!p[k]) return false;
+  }
+  return true;
+}
+
+function renderPath() {
+  const strip = document.getElementById("pathStrip");
+  strip.innerHTML = "";
+  const curWeek = weekOfDay(currentDay);
+  for (let w = 0; w < WEEKS.length; w++) {
+    const node = document.createElement("div");
+    node.className = "week-node" + (isWeekDone(w) ? " done" : "") + (w === curWeek ? " current" : "");
+    node.textContent = w + 1;
+    node.title = "Week " + (w + 1) + ": " + WEEKS[w].theme;
+    node.onclick = () => { currentDay = w * 5; render(); };
+    strip.appendChild(node);
+  }
+  const keys = keysForTrack(currentTrack);
+  const doneDays = Object.keys(progress).filter(k => {
+    const p = progress[k]; return p && keys.every(key => p[key]);
+  }).length;
+  document.getElementById("progressLabel").textContent = "Day " + (currentDay + 1) + " of 180";
+  document.getElementById("progressPct").textContent = Math.round((doneDays/180)*100) + "% complete";
+}
+
+function toggle(dayIdx, key) {
+  progress[dayIdx] = progress[dayIdx] || {};
+  const wasEmpty = !progress[dayIdx]._attended;
+  progress[dayIdx][key] = !progress[dayIdx][key];
+  if (wasEmpty && progress[dayIdx][key]) {
+    progress[dayIdx]._attended = new Date().toISOString().slice(0, 10);
+  }
+  saveProgress(progress);
+  render();
+}
+
+let viewMode = "day"; // "day" | "swaplist" | "swapday" | "attendance"
+
+function renderAttendance() {
+  const days = Object.keys(progress)
+    .map(k => ({ idx: parseInt(k), ...progress[k] }))
+    .filter(d => d._attended)
+    .sort((a, b) => a.idx - b.idx);
+
+  const totalAttended = days.length;
+  const weeksComplete = Array.from({length: 36}, (_, w) => w).filter(isWeekDone).length;
+  const firstDate = days.length ? days[0]._attended : "—";
+  const lastDate = days.length ? days[days.length - 1]._attended : "—";
+  const student = currentStudent();
+
+  document.getElementById("dayCard").innerHTML = `
+    <button class="back-link" onclick="exitSwapMode()">← Back to my regular days</button>
+    <div class="profile-row" style="justify-content:space-between;">
+      <h2 style="font-family:'Baloo 2',sans-serif;color:var(--leaf-dark);margin:0;">${student.name}'s Attendance</h2>
+      <button class="back-link" style="margin:0;" onclick="openStudentSwitcher()">👤 Switch student</button>
+    </div>
+    <p style="font-size:12.5px;color:var(--ink-soft);margin:2px 0 16px;">Track: ${currentTrack === "A" ? "Explorers (3–4)" : "Achievers (5–6)"}</p>
+    <div class="stat-grid">
+      <div class="stat-card"><span class="num">${totalAttended}</span><span class="lbl">DAYS ATTENDED</span></div>
+      <div class="stat-card"><span class="num">${weeksComplete}</span><span class="lbl">WEEKS COMPLETE</span></div>
+      <div class="stat-card"><span class="num">${firstDate}</span><span class="lbl">FIRST DAY</span></div>
+      <div class="stat-card"><span class="num">${lastDate}</span><span class="lbl">LAST DAY WORKED</span></div>
+    </div>
+    <div class="log-scroll">
+      <table class="log-table">
+        <thead><tr><th>Day</th><th>Week</th><th>Theme</th><th>Date attended</th></tr></thead>
+        <tbody>
+          ${days.length ? days.map(d => `
+            <tr>
+              <td>Day ${d.idx + 1}</td>
+              <td>Week ${weekOfDay(d.idx) + 1}</td>
+              <td>${WEEKS[weekOfDay(d.idx)].theme}</td>
+              <td>${d._attended}</td>
+            </tr>
+          `).join("") : '<tr><td colspan="4" style="text-align:center;color:var(--ink-soft);padding:20px;">No days logged yet — check off a subject on any day to start your attendance record.</td></tr>'}
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:14px;font-size:12px;color:var(--ink-soft);">This log is separate for each student and each track, saved automatically in this browser.</p>
+  `;
+  document.getElementById("prevBtn").disabled = true;
+  document.getElementById("nextBtn").disabled = true;
+  document.getElementById("pathStrip").parentElement.style.display = "none";
+}
+
+let pinUnlocked = false;
+function openStudentSwitcher() {
+  viewMode = "students";
+  render();
+}
+function renderStudentSwitcher() {
+  const pin = getPin();
+  const card = document.getElementById("dayCard");
+  document.getElementById("prevBtn").disabled = true;
+  document.getElementById("nextBtn").disabled = true;
+  document.getElementById("pathStrip").parentElement.style.display = "none";
+
+  if (pin && !pinUnlocked) {
+    card.innerHTML = `
+      <button class="back-link" onclick="exitSwapMode()">← Back to my regular days</button>
+      <h2 style="font-family:'Baloo 2',sans-serif;color:var(--leaf-dark);">Enter parent PIN</h2>
+      <p style="font-size:13px;color:var(--ink-soft);">Switching students or changing settings requires your parent PIN.</p>
+      <input id="pinEntry" type="password" inputmode="numeric" maxlength="6" placeholder="••••">
+      <div style="margin-top:14px;">
+        <button class="nav button" id="pinSubmitBtn" style="background:var(--leaf);color:#fff;border:none;padding:10px 20px;border-radius:999px;font-family:'Baloo 2',sans-serif;font-weight:600;cursor:pointer;">Unlock</button>
+      </div>
+      <p id="pinError" style="color:var(--coral-dark);font-size:13px;margin-top:8px;"></p>
+    `;
+    document.getElementById("pinSubmitBtn").onclick = () => {
+      const val = document.getElementById("pinEntry").value;
+      if (val === pin) { pinUnlocked = true; renderStudentSwitcher(); }
+      else { document.getElementById("pinError").textContent = "Incorrect PIN — try again."; }
+    };
+    return;
+  }
+
+  const students = getStudents();
+  const curId = getCurrentStudentId();
+  card.innerHTML = `
+    <button class="back-link" onclick="exitSwapMode()">← Back to my regular days</button>
+    <h2 style="font-family:'Baloo 2',sans-serif;color:var(--leaf-dark);margin:0 0 6px;">Switch student</h2>
+    <p style="font-size:13px;color:var(--ink-soft);margin:0 0 16px;">Each student keeps their own separate progress, attendance, and current day — for both tracks.</p>
+    <div id="studentList">
+      ${students.map(s => `
+        <div class="student-card ${s.id === curId ? "current" : ""}" onclick="selectStudent('${s.id}')">
+          <span class="name">${s.name}${s.id === curId ? " (current)" : ""}</span>
+          ${students.length > 1 ? `<button class="del" onclick="event.stopPropagation(); deleteStudent('${s.id}')">Remove</button>` : ""}
+        </div>
+      `).join("")}
+    </div>
+    <button class="add-student-btn" onclick="addStudent()">+ Add another student</button>
+    <div class="pin-box">
+      <p style="font-size:13px;color:var(--ink-soft);margin:0 0 8px;"><b>Parent PIN</b> — ${pin ? "currently set. Require it before switching students or changing settings." : "not set. Add one so kids can't switch profiles or change settings on their own."}</p>
+      <button class="add-student-btn" style="border-style:solid;" onclick="changePin()">${pin ? "Change or remove PIN" : "Set a parent PIN"}</button>
+    </div>
+  `;
+}
+function selectStudent(id) {
+  setCurrentStudentId(id);
+  viewMode = "day";
+  progress = loadProgress();
+  currentDay = loadCurrentDay();
+  updateStudentLabel();
+  render();
+}
+function addStudent() {
+  const name = prompt("Enter this student's name:");
+  if (!name || !name.trim()) return;
+  const students = getStudents();
+  const id = "s" + Date.now();
+  students.push({ id, name: name.trim() });
+  saveStudents(students);
+  selectStudent(id);
+}
+function deleteStudent(id) {
+  let students = getStudents();
+  if (students.length <= 1) return;
+  const s = students.find(x => x.id === id);
+  if (!confirm(`Remove ${s ? s.name : "this student"}? Their saved progress will stay in this browser but won't be shown in the list.`)) return;
+  students = students.filter(x => x.id !== id);
+  saveStudents(students);
+  if (getCurrentStudentId() === id) setCurrentStudentId(students[0].id);
+  renderStudentSwitcher();
+}
+function changePin() {
+  const current = getPin();
+  const next = prompt(current ? "Enter a new 4-6 digit PIN (leave blank to remove the PIN):" : "Create a 4-6 digit parent PIN:");
+  if (next === null) return;
+  setPin(next.trim());
+  renderStudentSwitcher();
+}
+function updateStudentLabel() {
+  document.getElementById("studentQuickLabel").textContent = currentStudent().name;
+}
+let currentSwapIndex = 0;
+let currentSwapDay = 0;
+
+function renderSwapList() {
+  document.getElementById("dayCard").innerHTML = `
+    <button class="back-link" onclick="exitSwapMode()">← Back to my regular days</button>
+    <h2 style="font-family:'Baloo 2',sans-serif;color:var(--leaf-dark);margin:0 0 12px;">Holiday swap weeks</h2>
+    <div class="swap-list">
+      ${SWAP_WEEKS.map((sw, i) => `
+        <div class="swap-card" onclick="openSwapWeek(${i})">
+          <span class="t">${sw.title}</span>
+          <span class="s">${sw.suggestedSwap}</span>
+        </div>
+      `).join("")}
+    </div>
+  `;
+  document.getElementById("prevBtn").disabled = true;
+  document.getElementById("nextBtn").disabled = true;
+  document.getElementById("pathStrip").parentElement.style.display = "none";
+}
+
+function renderSwapDay() {
+  const sw = SWAP_WEEKS[currentSwapIndex];
+  const week = { ...sw, letter: null };
+  const d = currentTrack === "A" ? dayContent(week, currentSwapDay) : dayContentB(week, sw.kScopeIndex, currentSwapDay);
+  const elective = electiveOfDay(sw.kScopeIndex, currentSwapDay);
+  const cardData = {
+    jumpstart: { label: currentTrack === "A" ? "App time" : "Core lesson", text: d.jumpstart },
+    handson: { label: "Hands-on activity", text: d.handson },
+    story: { label: "Story time", text: d.story },
+    skill: { label: "Skill focus", text: d.skill },
+    elective: { label: "Elective: " + elective.label, text: elective.activity },
+    circle: { label: "Circle time (do first)", text: CIRCLE_TIME.join(" · ") },
+  };
+  if (currentTrack === "B") cardData.appTime = { label: "App time", text: d.appTime };
+  const keys = keysForTrack(currentTrack);
+
+  document.getElementById("dayCard").innerHTML = `
+    <button class="back-link" onclick="renderSwapList()">← Back to holiday weeks</button>
+    <div class="day-top">
+      <div>
+        <div class="day-number">${sw.title} · ${d.name}</div>
+        <p class="week-theme">${sw.theme} · ${sw.suggestedSwap}</p>
+      </div>
+    </div>
+    <div class="bible-box"><b>Bible time (5 min):</b> ${sw.bible.trait} — <i>${sw.bible.child}</i> (${sw.bible.ref})</div>
+    <div class="trip-box"><b>Field trip idea:</b> ${sw.fieldTrip}</div>
+    <div class="subjects">
+      ${keys.map(key => {
+        const info = cardData[key];
+        return `<div class="subject">
+          <div class="subject-head"><label>${info.label}</label></div>
+          <p>${info.text}</p>
+        </div>`;
+      }).join("")}
+    </div>
+    <p style="margin-top:14px;font-size:12.5px;color:var(--ink-soft);"><i>Note: ${sw.notes}</i></p>
+  `;
+  document.getElementById("prevBtn").disabled = currentSwapDay === 0;
+  document.getElementById("nextBtn").disabled = currentSwapDay === 4;
+}
+
+function openSwapWeek(i) {
+  currentSwapIndex = i;
+  currentSwapDay = 0;
+  viewMode = "swapday";
+  renderSwapDay();
+}
+function exitSwapMode() {
+  viewMode = "day";
+  const sb = document.getElementById("swapBtn");
+  if (sb) sb.classList.remove("active");
+  document.getElementById("attendanceBtn").classList.remove("active");
+  document.getElementById("pathStrip").parentElement.style.display = "";
+  render();
+}
+
+function render() {
+  if (viewMode === "swaplist") { renderSwapList(); return; }
+  if (viewMode === "swapday") { renderSwapDay(); return; }
+  if (viewMode === "attendance") { renderAttendance(); return; }
+  if (viewMode === "students") { renderStudentSwitcher(); return; }
+  localStorage.setItem(lastDayKey(), currentDay);
+  const wIdx = weekOfDay(currentDay);
+  const dayOfWeek = currentDay % 5;
+  const week = WEEKS[wIdx];
+  const d = currentTrack === "A" ? dayContent(week, dayOfWeek) : dayContentB(week, wIdx, dayOfWeek);
+  const elective = electiveOfDay(wIdx, dayOfWeek);
+  const p = progress[currentDay] || {};
+  const isReview = !week.letter || week.letter === "Review";
+  const cardData = {
+    jumpstart: { label: currentTrack === "A" ? "App time" : "Core lesson", text: d.jumpstart },
+    appTime: { label: "App time", text: d.appTime },
+    handson: { label: "Hands-on activity", text: d.handson },
+    story: { label: "Story time", text: d.story },
+    skill: { label: "Skill focus", text: d.skill },
+    elective: { label: "Elective: " + elective.label, text: elective.activity },
+    circle: { label: "Circle time (do first)", text: CIRCLE_TIME.join(" · ") },
+  };
+
+  const card = document.getElementById("dayCard");
+  card.innerHTML = `
+    <div class="day-top">
+      <div>
+        <div class="day-number">Day ${currentDay+1} · ${d.name}</div>
+        <p class="week-theme">Week ${week.n} — ${week.theme} · ${d.focus} day</p>
+      </div>
+      <div class="badges">
+        ${currentTrack === "A" ? `
+          ${!isReview ? `<span class="badge">Letter ${week.letter}</span>` : ""}
+          ${week.number ? `<span class="badge">Number ${week.number}</span>` : ""}
+        ` : `
+          <span class="badge">Sounds: ${KSCOPE[wIdx].sounds}</span>
+        `}
+      </div>
+    </div>
+    <div class="bible-box"><b>Bible time (5 min):</b> ${week.bible.trait} — <i>${week.bible.child}</i> (${week.bible.ref})</div>
+    <div class="trip-box"><b>This week's field trip idea:</b> ${week.fieldTrip}</div>
+    <div class="subjects">
+      ${keysForTrack(currentTrack).map(key => {
+        const info = cardData[key];
+        const checked = !!p[key];
+        return `<div class="subject ${checked ? "checked" : ""}">
+          <div class="subject-head">
+            <input type="checkbox" id="chk-${key}" ${checked ? "checked" : ""} onchange="toggle(${currentDay},'${key}')">
+            <label for="chk-${key}">${info.label}</label>
+          </div>
+          <p>${info.text}</p>
+        </div>`;
+      }).join("")}
+    </div>
+  `;
+
+  document.getElementById("prevBtn").disabled = currentDay === 0;
+  document.getElementById("nextBtn").disabled = currentDay === 179;
+  renderPath();
+}
+
+document.getElementById("prevBtn").onclick = () => {
+  if (viewMode === "swapday") { if (currentSwapDay > 0) { currentSwapDay--; renderSwapDay(); } return; }
+  if (currentDay > 0) { currentDay--; render(); }
+};
+document.getElementById("nextBtn").onclick = () => {
+  if (viewMode === "swapday") { if (currentSwapDay < 4) { currentSwapDay++; renderSwapDay(); } return; }
+  if (currentDay < 179) { currentDay++; render(); }
+};
+document.getElementById("resumeBtn").onclick = () => { exitSwapMode(); };
+const swapBtnEl = document.getElementById("swapBtn");
+if (swapBtnEl) {
+  swapBtnEl.onclick = () => {
+    if (viewMode === "day") {
+      viewMode = "swaplist";
+      swapBtnEl.classList.add("active");
+      render();
+    } else {
+      exitSwapMode();
+    }
+  };
+}
+document.getElementById("printBtn").onclick = () => { window.print(); };
+document.getElementById("attendanceBtn").onclick = () => {
+  const btn = document.getElementById("attendanceBtn");
+  if (viewMode !== "attendance") {
+    const sb = document.getElementById("swapBtn");
+    if (sb) sb.classList.remove("active");
+    viewMode = "attendance";
+    btn.classList.add("active");
+    render();
+  } else {
+    exitSwapMode();
+  }
+};
+
+function switchTrack(track) {
+  currentTrack = track;
+  localStorage.setItem("kr_track", track);
+  document.getElementById("trackABtn").classList.toggle("active", track === "A");
+  document.getElementById("trackBBtn").classList.toggle("active", track === "B");
+  document.querySelector(".tagline").textContent = track === "A"
+    ? "Explorers Track (ages 3–4) · Day-by-day, click and go"
+    : "Achievers Track (ages 5–6) · Common Core aligned, day-by-day";
+  viewMode = "day";
+  const sb2 = document.getElementById("swapBtn");
+  if (sb2) sb2.classList.remove("active");
+  document.getElementById("attendanceBtn").classList.remove("active");
+  document.getElementById("pathStrip").parentElement.style.display = "";
+  progress = loadProgress();
+  currentDay = loadCurrentDay();
+  render();
+}
+document.getElementById("trackABtn").onclick = () => switchTrack("A");
+document.getElementById("trackBBtn").onclick = () => switchTrack("B");
+switchTrack(currentTrack);
+updateStudentLabel();
+document.getElementById("studentQuickBtn").onclick = () => { openStudentSwitcher(); };
+</script>
+</body>
+</html>
